@@ -8,8 +8,6 @@ function refreshsafe () {
     }else {
         cart = [];
     }
-
-
     if ((JSON.parse(localStorage.getItem('count')))>0) {
         count=JSON.parse(localStorage.getItem('count'))
     }else {
@@ -61,7 +59,6 @@ export function AddToCart () {
             savelocal ();
         }
         cartcount();
-    console.log(cart);
   });
 });
 }
@@ -84,7 +81,7 @@ export function deleteitem () {
         dclick.addEventListener('click', () => {
             removecart(deleteid);
             countcal ();
-            
+            location.reload(true);
         })
         
     })
@@ -93,10 +90,19 @@ export function deleteitem () {
 export function countcal () {
     let tedad = 0;
     cart.forEach((products) => {
-        tedad += products.quantity;
+        if (products.quantity) {
+            tedad += products.quantity;
+        }
     })
     count = tedad;
     savelocal();
     return count;
 }
 
+
+
+export function cartreset () {
+    cart = [];
+    count = 0;
+    savelocal();
+}

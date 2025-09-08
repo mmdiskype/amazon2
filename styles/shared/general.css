@@ -77,6 +77,7 @@ input, select, button {
 .link-primary {
   color: rgb(1, 124, 182);
   cursor: pointer;
+  text-decoration: solid;
 }
 
 .link-primary:hover {

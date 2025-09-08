@@ -1,13 +1,14 @@
-import {priceof, deleteitem, cart, countcal, savelocal} from './cart.js';
+import {priceof, deleteitem, cart, countcal, savelocal, count, cartreset} from './cart.js';
 import {products} from '../data/products.js';
 import {deliopt} from '../data/delivery.js';
+import {history} from '../data/history.js';
 import dayjs from 'https://cdn.jsdelivr.net/npm/dayjs@1.11.18/+esm';
 let htmlitem = '';
 
 export let matchingPro=[];
 export let totalPrice=0;
-
-cart.forEach((oncart) => {
+function normalize() {
+  cart.forEach((oncart) => {
     const equal = oncart.productId;
     products.forEach((selected) => {
         if (selected.id===equal) {
@@ -18,15 +19,17 @@ cart.forEach((oncart) => {
         }
     });
 });
+}
 
-// console.log(totalPrice);
+normalize();
+
 deleteitem();
 export function cardgen () {
   matchingPro.forEach((productd) => {
   htmlitem += `
     <div class="cart-item-container" data-delete-container="${productd.id}">
         <div class="delivery-date">
-          Delivery date: Tuesday, June 21
+          Delivery date: ${arrivalday(productd.shipping)}
         </div>
 
         <div class="cart-item-details-grid">
@@ -45,7 +48,7 @@ export function cardgen () {
                 Quantity: <span class="quantity-label">${productd.quantity}</span>
               </span>
               <span class="update-quantity-link link-primary">
-                Update
+                <a class="update-quantity-link link-primary" href="amazon.html">Update</a>
               </span>
               <span class="delete-quantity-link link-primary" data-delete="${productd.id}">
                 Delete
@@ -78,11 +81,9 @@ document.querySelector('.checkout-header-middle-section').innerHTML = `
 
 deleteitem();
 
-
 function delidate (productId , productf) {
   let htmldeli = '';
   shippingcheck (productf);
-  console.log(deliopt);
   deliopt.forEach((deliveryopt) => {
   const today = dayjs();
   const delivery = today.add(deliveryopt.deliverydays, 'days');
@@ -103,14 +104,29 @@ function delidate (productId , productf) {
   return htmldeli;
 }
 
+function arrivalday (shipping) {
+  let today = dayjs();
+  if (shipping === 1) {
+    const delivery = today.add(7, 'days');
+    return delivery.format('dddd, MMMM D');
+  }else if (shipping === 2) {
+    const delivery = today.add(3, 'days');
+    return delivery.format('dddd, MMMM D');
+  }else if (shipping === 3) {
+    const delivery = today.add(1, 'days');
+    return delivery.format('dddd, MMMM D');
+  }
+}
+
 function shippingcart () {
   document.querySelectorAll('.delivery-option-input').forEach((inputelement) => {
   inputelement.addEventListener('click', () => {
+    normalize()
+    cardgen ();
     cart.forEach((citem) => {
       if (citem.productId === inputelement.getAttribute('name')){
         citem.shipping = Number(inputelement.dataset.idCost);
         savelocal ();
-        console.log(shippingcost());
         cartSummary();
       }
     })
@@ -147,7 +163,6 @@ function shippingcost () {
   return shippingsum;
 }
 
-
 function cartSummary () {
   document.querySelector('.payment-summary').innerHTML = `
           <div class="payment-summary-title">
@@ -178,11 +193,60 @@ function cartSummary () {
             <div>Order total:</div>
             <div class="payment-summary-money">$${priceof((totalPrice+shippingcost())*110/100)}</div>
           </div>
-
-          <button class="place-order-button button-primary">
-            Place your order
-          </button>
+          <a>
+            <button class="place-order-button button-primary">
+              Place your order
+            </button>
+          </a>
   `;
 }
 
 cartSummary();
+
+function timefalesafe () {
+  let counter = 0
+  cart.forEach((product) => {
+    if (product.time) {
+      counter++
+    }
+  })
+  if (counter === 1) {
+    return true;
+  }else {
+    return false;
+  }
+}
+
+
+function savehistory () {
+  const today = dayjs();
+  const addedtime = Number(today.format('HHmm'));
+  const finished = {time: addedtime};
+  if (!timefalesafe()) {
+    cart.push(finished);
+  }
+  savelocal();
+  let finishcart = [];
+  cart.forEach((product) => {
+    finishcart.push(product);
+    
+  })
+  history.push(finishcart);
+  localStorage.setItem('history', JSON.stringify(history))
+}
+
+
+function placeorder () {
+  const bnana = document.querySelector('.place-order-button');
+  bnana.addEventListener('click' , () => {
+    savehistory();
+    cartreset();
+    savelocal();
+  })
+}
+
+placeorder();
+
+//  href="orders.html"
+
+
