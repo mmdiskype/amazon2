@@ -8,6 +8,8 @@ let htmlitem = '';
 export let matchingPro=[];
 export let totalPrice=0;
 function normalize() {
+  matchingPro = [];
+  htmlitem = '';
   cart.forEach((oncart) => {
     const equal = oncart.productId;
     products.forEach((selected) => {
@@ -25,54 +27,59 @@ normalize();
 
 deleteitem();
 export function cardgen () {
-  matchingPro.forEach((productd) => {
-  htmlitem += `
-    <div class="cart-item-container" data-delete-container="${productd.id}">
-        <div class="delivery-date">
-          Delivery date: ${arrivalday(productd.shipping)}
+    matchingPro.forEach((productd) => {
+      htmlitem += `
+        <div class="cart-item-container" data-delete-container="${productd.id}">
+            <div class="delivery-date">
+              Delivery date: ${arrivalday(productd.shipping)}
+            </div>
+
+            <div class="cart-item-details-grid">
+              <img class="product-image"
+                src="${productd.image}">
+
+              <div class="cart-item-details">
+                <div class="product-name">
+                  ${productd.name}
+                </div>
+                <div class="product-price">
+                  ${priceof(productd.priceCents)}
+                </div>
+                <div class="product-quantity">
+                  <span>
+                    Quantity: <span class="quantity-label">${productd.quantity}</span>
+                  </span>
+                  <span class="update-quantity-link link-primary">
+                    <a class="update-quantity-link link-primary" href="amazon.html">Update</a>
+                  </span>
+                  <span class="delete-quantity-link link-primary" data-delete="${productd.id}">
+                    Delete
+                  </span>
+                </div>
+              </div>
+
+              <div class="delivery-options">
+                <div class="delivery-options-title">
+                  Choose a delivery option:
+                </div>
+                <div class="delivery-option">
+                ${delidate(productd.id , productd.shipping)}
+                </div>
+              </div>
+            </div>
         </div>
-
-        <div class="cart-item-details-grid">
-          <img class="product-image"
-            src="${productd.image}">
-
-          <div class="cart-item-details">
-            <div class="product-name">
-              ${productd.name}
-            </div>
-            <div class="product-price">
-              ${priceof(productd.priceCents)}
-            </div>
-            <div class="product-quantity">
-              <span>
-                Quantity: <span class="quantity-label">${productd.quantity}</span>
-              </span>
-              <span class="update-quantity-link link-primary">
-                <a class="update-quantity-link link-primary" href="amazon.html">Update</a>
-              </span>
-              <span class="delete-quantity-link link-primary" data-delete="${productd.id}">
-                Delete
-              </span>
-            </div>
-          </div>
-
-          <div class="delivery-options">
-            <div class="delivery-options-title">
-              Choose a delivery option:
-            </div>
-            <div class="delivery-option">
-            ${delidate(productd.id , productd.shipping)}
-            </div>
-          </div>
-        </div>
-    </div>
-`;
-})
+    `;
+    
+  })
+  console.log('cardgen success');
 }
 
 cardgen();
-
+console.log(matchingPro);
+console.log('next one')
 document.querySelector('.order-summary').innerHTML = htmlitem;
+
+
 
 document.querySelector('.checkout-header-middle-section').innerHTML = `
             Checkout (<a class="return-to-home-link"
@@ -121,17 +128,27 @@ function arrivalday (shipping) {
 function shippingcart () {
   document.querySelectorAll('.delivery-option-input').forEach((inputelement) => {
   inputelement.addEventListener('click', () => {
-    normalize()
-    cardgen ();
+    console.log('it worked')
+    const cherry  = inputelement.getAttribute('name');
     cart.forEach((citem) => {
-      if (citem.productId === inputelement.getAttribute('name')){
+      if (citem.productId === cherry){
         citem.shipping = Number(inputelement.dataset.idCost);
         savelocal ();
         cartSummary();
+        console.log('inside if')
       }
     })
+    normalize();
+    delidate();
+    cardgen ();
+    console.log('/////////////////////////////////////////////////////////////////////////////');
+    console.log(htmlitem);
+    console.log('/////////////////////////////////////////////////////////////////////////////');
+    console.log(matchingPro);
+    
   })
 })
+
 }
 
 shippingcart ();
@@ -248,5 +265,4 @@ function placeorder () {
 placeorder();
 
 //  href="orders.html"
-
 
